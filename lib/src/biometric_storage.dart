@@ -290,6 +290,12 @@ abstract class BiometricStorage extends PlatformInterface {
     String content,
     PromptInfo promptInfo,
   );
+
+  @protected
+  Future<bool?> exists(
+    String name,
+    PromptInfo promptInfo,
+  );
 }
 
 class MethodChannelBiometricStorage extends BiometricStorage {
@@ -450,6 +456,16 @@ class MethodChannelBiometricStorage extends BiometricStorage {
     }
   }
 
+  @override
+  Future<bool?> exists(
+    String name,
+    PromptInfo promptInfo,
+  ) =>
+      _transformErrors(_channel.invokeMethod<bool>('exists', <String, dynamic>{
+        'name': name,
+        ..._promptInfoForCurrentPlatform(promptInfo),
+      }));
+
   Future<T> _transformErrors<T>(Future<T> future) =>
       future.catchError((Object error, StackTrace stackTrace) {
         if (error is PlatformException) {
@@ -501,4 +517,8 @@ class BiometricStorageFile {
   /// Delete the content of this storage.
   Future<void> delete({PromptInfo? promptInfo}) =>
       _plugin.delete(name, promptInfo ?? defaultPromptInfo);
+
+  /// Check the content exists.
+  Future<void> exists({PromptInfo? promptInfo}) =>
+      _plugin.exists(name, promptInfo ?? defaultPromptInfo);
 }
