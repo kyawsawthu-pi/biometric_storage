@@ -318,10 +318,7 @@ class BiometricStorageFile {
   }
   
   func exists(_ result: @escaping StorageCallback, _ promptInfo: IOSPromptInfo) {
-    guard let query = baseQueryNoAuth() else {
-      return;
-    }
-    
+    let query = baseQueryNoAuth()
     let status = SecItemCopyMatching(query as CFDictionary, nil)
     if status == errSecItemNotFound {
       result(false)
