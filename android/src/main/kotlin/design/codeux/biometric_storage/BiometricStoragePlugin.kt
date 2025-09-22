@@ -277,6 +277,12 @@ class BiometricStoragePlugin : FlutterPlugin, ActivityAware, MethodCallHandler {
                     }
                 }
 
+                "exists" -> {
+                    withStorage {
+                        result.success(exists())
+                    }
+                }
+
                 else -> result.notImplemented()
             }
         } catch (e: MethodCallException) {
