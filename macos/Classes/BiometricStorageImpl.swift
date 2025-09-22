@@ -320,12 +320,16 @@ class BiometricStorageFile {
       //      kSecMatchLimit as String: kSecMatchLimitOne,
       kSecValueData as String: content.data(using: String.Encoding.utf8) as Any,
     ]) { (_, new) in new }
-    var status = SecItemAdd(query as CFDictionary, nil)
-    if (status == errSecDuplicateItem) {
-      hpdebug("Value already exists. updating.")
-      let update = [kSecValueData as String: query[kSecValueData as String]]
-      query.removeValue(forKey: kSecValueData as String)
-      status = SecItemUpdate(query as CFDictionary, update as CFDictionary)
+    
+    var status = SecItemCopyMatching(query as CFDictionary, nil)
+    if status == errSecItemNotFound {
+        hpdebug("New value added.")
+        status = SecItemAdd(query as CFDictionary, nil)
+    } else {
+        hpdebug("Value already exists. updating.")
+        let update = [kSecValueData as String: query[kSecValueData as String]]
+        query.removeValue(forKey: kSecValueData as String)
+        status = SecItemUpdate(query as CFDictionary, update as CFDictionary)
     }
     guard status == errSecSuccess else {
       handleOSStatusError(status, result, "writing data")
