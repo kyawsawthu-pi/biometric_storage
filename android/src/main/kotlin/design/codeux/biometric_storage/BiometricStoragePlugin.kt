@@ -256,7 +256,9 @@ class BiometricStoragePlugin : FlutterPlugin, ActivityAware, MethodCallHandler {
                             ui(resultError) { result.success(ret) }
                         }
                     } else {
-                        result.success(null)
+                        withAuth(CipherMode.Encrypt) {
+                            ui(resultError) { result.success(null) }
+                        }
                     }
                 }
 
@@ -272,6 +274,12 @@ class BiometricStoragePlugin : FlutterPlugin, ActivityAware, MethodCallHandler {
                     withAuth(CipherMode.Encrypt) {
                         writeFile(it, requiredArgument(PARAM_WRITE_CONTENT))
                         ui(resultError) { result.success(true) }
+                    }
+                }
+
+                "exists" -> {
+                    withStorage {
+                        result.success(exists())
                     }
                 }
 
