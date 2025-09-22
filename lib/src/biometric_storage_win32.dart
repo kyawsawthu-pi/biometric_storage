@@ -133,4 +133,12 @@ class Win32BiometricStoragePlugin extends BiometricStorage {
       _logger.fine('free done');
     }
   }
+
+  @override
+  Future<bool?> exists(
+    String name,
+    PromptInfo promptInfo,
+  ) async {
+    throw UnimplementedError();
+  };
 }
