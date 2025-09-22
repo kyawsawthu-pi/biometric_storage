@@ -66,5 +66,5 @@ class BiometricStoragePluginWeb extends BiometricStorage {
     PromptInfo promptInfo,
   ) async {
     throw UnimplementedError();
-  };
+  }
 }

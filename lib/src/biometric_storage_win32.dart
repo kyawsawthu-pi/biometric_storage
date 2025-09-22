@@ -140,5 +140,5 @@ class Win32BiometricStoragePlugin extends BiometricStorage {
     PromptInfo promptInfo,
   ) async {
     throw UnimplementedError();
-  };
+  }
 }
