@@ -519,6 +519,6 @@ class BiometricStorageFile {
       _plugin.delete(name, promptInfo ?? defaultPromptInfo);
 
   /// Check the content exists.
-  Future<void> exists({PromptInfo? promptInfo}) =>
+  Future<bool?> exists({PromptInfo? promptInfo}) =>
       _plugin.exists(name, promptInfo ?? defaultPromptInfo);
 }
