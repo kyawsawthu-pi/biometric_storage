@@ -256,7 +256,9 @@ class BiometricStoragePlugin : FlutterPlugin, ActivityAware, MethodCallHandler {
                             ui(resultError) { result.success(ret) }
                         }
                     } else {
-                        result.success(null)
+                        withAuth(CipherMode.Encrypt) {
+                            ui(resultError) { result.success(null) }
+                        }
                     }
                 }
 
