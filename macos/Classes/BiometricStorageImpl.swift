@@ -48,11 +48,11 @@ class BiometricStorageImpl {
   private var stores: [String: BiometricStorageFile] = [:]
   private let storageError: StorageError
   private let storageMethodNotImplemented: Any
-
+  
   private func storageError(code: String, message: String?, details: Any?) -> Any {
     return storageError(code, message, details)
   }
-
+  
   public func handle(_ call: StorageMethodCall, result: @escaping StorageCallback) {
     
     func requiredArg<T>(_ name: String, _ cb: (T) -> Void) {
@@ -117,6 +117,14 @@ class BiometricStorageImpl {
         requiredArg("iosPromptInfo") { promptInfo in
           requireStorage(name) { file in
             file.delete(result, IOSPromptInfo(params: promptInfo))
+          }
+        }
+      }
+    } else if ("exists" == call.method) {
+      requiredArg("name") { name in
+        requiredArg("iosPromptInfo") { promptInfo in
+          requireStorage(name) { file in
+            file.exists(result, IOSPromptInfo(params: promptInfo))
           }
         }
       }
@@ -219,6 +227,14 @@ class BiometricStorageFile {
     return query
   }
   
+  private func baseQueryNoAuth() -> [String: Any] {
+    return [
+      kSecClass as String: kSecClassGenericPassword,
+      kSecAttrService as String: "flutter_biometric_storage",
+      kSecAttrAccount as String: name,
+    ]
+  }
+  
   private func accessControl(_ result: @escaping StorageCallback) -> SecAccessControl? {
     let accessControlFlags: SecAccessControlCreateFlags
     
@@ -301,6 +317,19 @@ class BiometricStorageFile {
     handleOSStatusError(status, result, "writing data")
   }
   
+  func exists(_ result: @escaping StorageCallback, _ promptInfo: IOSPromptInfo) {
+    guard let query = baseQueryNoAuth() else {
+      return;
+    }
+    
+    let status = SecItemCopyMatching(query as CFDictionary, nil)
+    if status == errSecItemNotFound {
+      result(false)
+    } else {
+      result(true)
+    }
+  }
+  
   func write(_ content: String, _ result: @escaping StorageCallback, _ promptInfo: IOSPromptInfo) {
     guard var query = baseQuery(result) else {
       return;
@@ -323,13 +352,13 @@ class BiometricStorageFile {
     
     var status = SecItemCopyMatching(query as CFDictionary, nil)
     if status == errSecItemNotFound {
-        hpdebug("New value added.")
-        status = SecItemAdd(query as CFDictionary, nil)
+      hpdebug("New value added.")
+      status = SecItemAdd(query as CFDictionary, nil)
     } else {
-        hpdebug("Value already exists. updating.")
-        let update = [kSecValueData as String: query[kSecValueData as String]]
-        query.removeValue(forKey: kSecValueData as String)
-        status = SecItemUpdate(query as CFDictionary, update as CFDictionary)
+      hpdebug("Value already exists. updating.")
+      let update = [kSecValueData as String: query[kSecValueData as String]]
+      query.removeValue(forKey: kSecValueData as String)
+      status = SecItemUpdate(query as CFDictionary, update as CFDictionary)
     }
     guard status == errSecSuccess else {
       handleOSStatusError(status, result, "writing data")
